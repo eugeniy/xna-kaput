@@ -16,12 +16,19 @@ namespace Kaput
     /// </summary>
     public class Game1 : Microsoft.Xna.Framework.Game
     {
+        Camera m_camera;
+        Statistics m_stats;
+        Map m_map;
+
         GraphicsDeviceManager graphics;
         SpriteBatch spriteBatch;
 
         public Game1()
         {
             graphics = new GraphicsDeviceManager(this);
+            graphics.PreferMultiSampling = true;
+            graphics.PreferredBackBufferWidth = 960;
+            graphics.PreferredBackBufferHeight = 640;
             Content.RootDirectory = "Content";
         }
 
@@ -33,7 +40,14 @@ namespace Kaput
         /// </summary>
         protected override void Initialize()
         {
-            // TODO: Add your initialization logic here
+            m_camera = new Camera(this);
+            Components.Add(m_camera);
+
+            m_stats = new Statistics(this, Content);
+            Components.Add(m_stats);
+
+            m_map = new Map(this, Content);
+            Components.Add(m_map);
 
             base.Initialize();
         }
@@ -67,10 +81,13 @@ namespace Kaput
         protected override void Update(GameTime gameTime)
         {
             // Allows the game to exit
-            if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed)
+            if (Keyboard.GetState().IsKeyDown(Keys.Escape))
                 this.Exit();
 
-            // TODO: Add your update logic here
+            // Display some debug information
+            m_stats["Position"] = String.Format("({0:0.###}, {1:0.###}, {2:0.###})", m_camera.Position.X, m_camera.Position.Y, m_camera.Position.Z);
+            m_stats["Yaw"] = String.Format("{0:0.###}", MathHelper.ToDegrees(m_camera.Yaw));
+            m_stats["Pitch"] = String.Format("{0:0.###}", MathHelper.ToDegrees(m_camera.Pitch));
 
             base.Update(gameTime);
         }
@@ -81,9 +98,9 @@ namespace Kaput
         /// <param name="gameTime">Provides a snapshot of timing values.</param>
         protected override void Draw(GameTime gameTime)
         {
-            GraphicsDevice.Clear(Color.CornflowerBlue);
+            GraphicsDevice.Clear(Color.SlateGray);
 
-            // TODO: Add your drawing code here
+            m_map.Draw(gameTime, m_camera);
 
             base.Draw(gameTime);
         }
