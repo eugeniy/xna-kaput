@@ -51,6 +51,15 @@ namespace Kaput
             View = CreateLookAt();
         }
 
+        public Camera(Game game, Vector3 position, float yaw, float pitch)
+            : this(game)
+        {
+            Position = position;
+            Yaw = yaw;
+            Pitch = pitch;
+            Position = new Vector3(1, 10, 5);
+        }
+
 
         /// <summary>
         /// Allows the game component to perform any initialization it needs to before starting
@@ -165,6 +174,7 @@ namespace Kaput
         public Vector3 Position
         {
             get { return m_position; }
+            protected set { m_position = value; }
         }
 
 
@@ -174,6 +184,11 @@ namespace Kaput
         public float Yaw
         {
             get { return (float)(Math.PI - Math.Atan2(m_direction.X, m_direction.Z)); }
+            protected set
+            {
+                m_rotation = Quaternion.CreateFromAxisAngle(m_up, -value);
+                m_direction = Vector3.Transform(m_direction, m_rotation);
+            }
         }
 
 
@@ -183,6 +198,11 @@ namespace Kaput
         public float Pitch
         {
             get { return (float)Math.Asin(m_direction.Y); }
+            protected set
+            {
+                m_rotation = Quaternion.CreateFromAxisAngle(Vector3.Cross(m_up, m_direction), value);
+                m_direction = Vector3.Transform(m_direction, m_rotation);
+            }
         }
 
 

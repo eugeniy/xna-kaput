@@ -40,7 +40,7 @@ namespace Kaput
         /// </summary>
         protected override void Initialize()
         {
-            m_camera = new Camera(this);
+            m_camera = new Camera(this, new Vector3(0, 5, 0), MathHelper.ToRadians(45), MathHelper.ToRadians(30));
             Components.Add(m_camera);
 
             m_stats = new Statistics(this, Content);
