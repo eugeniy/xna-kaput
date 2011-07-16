@@ -1,0 +1,11 @@
+*.exe
+*.suo
+*.vsp
+*.cachefile
+*.csproj.user
+*.VisualState.xml
+TestResult.xml
+bin
+obj
+_ReSharper.*
+*.ReSharper.user
