@@ -21,8 +21,7 @@ namespace Kaput
         protected const float m_farPlaneDistance = 100;
 
         protected const float m_speed = 0.25f;
-        protected const float m_mouseSpeedX = 0.0045f;
-        protected const float m_mouseSpeedY = 0.0025f;
+        protected const float m_rotationSpeed = m_speed / 10;
 
         protected int m_windowWidth;
         protected int m_windowHeight;
@@ -49,15 +48,9 @@ namespace Kaput
             // Create default camera matrices
             Projection = Matrix.CreatePerspectiveFieldOfView(MathHelper.PiOver4, m_aspectRatio, m_nearPlaneDistance, m_farPlaneDistance);
             View = CreateLookAt();
-        }
 
-        public Camera(Game game, Vector3 position, float yaw, float pitch)
-            : this(game)
-        {
-            Position = position;
-            Yaw = yaw;
-            Pitch = pitch;
-            Position = new Vector3(1, 10, 5);
+            // Use isometric view by default
+            MoveTo(new Vector3(0, 10, 0), MathHelper.ToRadians(45), MathHelper.ToRadians(30));
         }
 
 
@@ -81,47 +74,42 @@ namespace Kaput
             var mouse = Mouse.GetState();
             var keyboard = Keyboard.GetState();
 
+            // Disregard Y coordinate, since we just want to move parallel to the ground
+            Vector3 rotation = new Vector3(m_direction.X, 0, m_direction.Z);
+
             // Move camera with WASD keys
             if (keyboard.IsKeyDown(Keys.W))
-                // Move forward and backwards by adding m_position and m_direction vectors
-                m_position += m_direction * m_speed;
+                m_position += rotation * m_speed;
 
             if (keyboard.IsKeyDown(Keys.S))
-                m_position -= m_direction * m_speed;
+                m_position -= rotation * m_speed;
 
             if (keyboard.IsKeyDown(Keys.A))
+                // Rotate the camera when holding a Shift
+                if (keyboard.IsKeyDown(Keys.LeftShift))
+                    Yaw = -m_rotationSpeed;
                 // Strafe by adding a cross product of m_up and m_direction vectors
-                m_position += Vector3.Cross(m_up, m_direction) * m_speed;
+                else m_position += Vector3.Cross(m_up, m_direction) * m_speed;
 
             if (keyboard.IsKeyDown(Keys.D))
-                m_position -= Vector3.Cross(m_up, m_direction) * m_speed;
-
-            if (keyboard.IsKeyDown(Keys.Space))
-                m_position += m_up * m_speed;
-
-            if (keyboard.IsKeyDown(Keys.LeftControl) || keyboard.IsKeyDown(Keys.X))
-                m_position -= m_up * m_speed;
-
+                if (keyboard.IsKeyDown(Keys.LeftShift))
+                    Yaw = m_rotationSpeed;
+                else m_position -= Vector3.Cross(m_up, m_direction) * m_speed;
 
             if (mouse != m_prevMouse)
             {
-                float yawChange = -m_mouseSpeedX * (mouse.X - m_prevMouse.X);
+                // Zoom with a mouse wheel
+                if (mouse.ScrollWheelValue > m_prevMouse.ScrollWheelValue)
+                    if (keyboard.IsKeyDown(Keys.LeftShift))
+                        Pitch = m_rotationSpeed;
+                    else m_position -= m_up * m_speed;
+                else if (mouse.ScrollWheelValue < m_prevMouse.ScrollWheelValue)
+                    if (keyboard.IsKeyDown(Keys.LeftShift))
+                        Pitch = -m_rotationSpeed;
+                    else m_position += m_up * m_speed;
 
-                // For the ground camera, we want to limit how far up or down it can point
-                float angle = m_mouseSpeedY * (mouse.Y - m_prevMouse.Y);
-                float pitchChange = ((Pitch < m_pitchLimit || angle > 0) && (Pitch > -m_pitchLimit || angle < 0)) ? angle : 0;
-
-                m_rotation = CreateRotation(yawChange, pitchChange, 0, m_direction, m_up);
-                m_direction = Vector3.Transform(m_direction, m_rotation);
-
-                // Up vector should stay constant unless we're doing flying or vehicles
-                // m_up = Vector3.Transform(m_up, m_rotation);
-
-                // Reset the position of the cursor to the center
-                Mouse.SetPosition(m_windowWidth / 2, m_windowHeight / 2);
                 m_prevMouse = Mouse.GetState();
             }
-
         }
 
 
@@ -169,6 +157,20 @@ namespace Kaput
 
 
         /// <summary>
+        /// Move the camera to the given position, yaw and pitch.
+        /// </summary>
+        /// <param name="position">A destination position of the camera.</param>
+        /// <param name="yaw">Yaw of the camera in radians.</param>
+        /// <param name="pitch">Pitch of the camera in radians.</param>
+        public void MoveTo(Vector3 position, float yaw, float pitch)
+        {
+            Position = position;
+            Yaw = yaw;
+            Pitch = pitch;
+        }
+
+
+        /// <summary>
         /// Position vector.
         /// </summary>
         public Vector3 Position
@@ -207,15 +209,6 @@ namespace Kaput
 
 
         /// <summary>
-        /// Distance to the far plane of the camera frustum.
-        /// </summary>
-        public float FarPlane
-        {
-            get { return m_farPlaneDistance; }
-        }
-
-
-        /// <summary>
         /// View matrix accessor.
         /// </summary>
         public Matrix View { get; set; }
@@ -225,6 +218,5 @@ namespace Kaput
         /// Projection matrix accessor.
         /// </summary>
         public Matrix Projection { get; set; }
-
     }
 }
