@@ -1,9 +1,9 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 11.00
 # Visual Studio 2010
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Kaput", "Kaput\Kaput\Kaput.csproj", "{3DB73E4B-D5AF-47C1-80D7-87C52BC7700B}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Kaput", "Kaput\Kaput.csproj", "{3DB73E4B-D5AF-47C1-80D7-87C52BC7700B}"
 EndProject
-Project("{96E2B04D-8817-42C6-938A-82C39BA4D311}") = "KaputContent", "Kaput\KaputContent\KaputContent.contentproj", "{D3CBF016-2D30-4E8E-B128-10FCD405FAFF}"
+Project("{96E2B04D-8817-42C6-938A-82C39BA4D311}") = "KaputContent", "KaputContent\KaputContent.contentproj", "{D3CBF016-2D30-4E8E-B128-10FCD405FAFF}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
