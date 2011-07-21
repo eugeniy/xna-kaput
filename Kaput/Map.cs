@@ -11,8 +11,9 @@ namespace Kaput
 
         protected ContentManager m_content;
         protected Effect m_effect;
+        protected Texture2D m_texture;
 
-        protected VertexPositionColor[] m_vertices;
+        protected VertexPositionNormalTexture[] m_vertices;
         protected int[] m_indices;
         protected float[,] m_heightMap;
 
@@ -40,6 +41,8 @@ namespace Kaput
             // Load a simple shader used to display the terrain
             m_effect = m_content.Load<Effect>(@"Effects\Simple");
 
+            m_texture = m_content.Load<Texture2D>(@"Textures\Cobblestone");
+
             base.LoadContent();
         }
 
@@ -49,14 +52,16 @@ namespace Kaput
         /// </summary>
         protected void GenerateVertices()
         {
-            m_vertices = new VertexPositionColor[m_width * m_height];
+            m_vertices = new VertexPositionNormalTexture[m_width * m_height];
 
             for (int x = 0; x < m_width; x++)
             {
                 for (int y = 0; y < m_height; y++)
                 {
                     m_vertices[x + y * m_width].Position = new Vector3(x, m_heightMap[x, y], -y);
-                    m_vertices[x + y * m_width].Color = Color.White;
+                    //m_vertices[x + y * m_width].Color = Color.White;
+                    m_vertices[x + y * m_width].TextureCoordinate.X = (float)x / 30.0f;
+                    m_vertices[x + y * m_width].TextureCoordinate.Y = (float)y / 30.0f;
                 }
             }
         }
@@ -92,7 +97,7 @@ namespace Kaput
         protected void LoadToBuffer()
         {
             // Allocate memory on the graphics device and copy vertices in it
-            m_vertexBuffer = new VertexBuffer(GraphicsDevice, VertexPositionColor.VertexDeclaration, m_vertices.Length, BufferUsage.WriteOnly);
+            m_vertexBuffer = new VertexBuffer(GraphicsDevice, VertexPositionNormalTexture.VertexDeclaration, m_vertices.Length, BufferUsage.WriteOnly);
             m_vertexBuffer.SetData(m_vertices);
 
             // Do the same for indices
@@ -108,10 +113,14 @@ namespace Kaput
         /// <param name="camera">Reference to the instance of the camera class.</param>
         public void Draw(GameTime gameTime, Camera camera)
         {
-            m_effect.CurrentTechnique = m_effect.Techniques["Simple"];
+            m_effect.CurrentTechnique = m_effect.Techniques["Textured"];
             m_effect.Parameters["World"].SetValue(Matrix.Identity);
             m_effect.Parameters["View"].SetValue(camera.View);
             m_effect.Parameters["Projection"].SetValue(camera.Projection);
+
+
+            m_effect.Parameters["xTexture"].SetValue(m_texture);
+
 
             foreach (EffectPass pass in m_effect.CurrentTechnique.Passes)
             {
